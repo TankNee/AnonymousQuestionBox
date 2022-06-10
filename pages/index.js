@@ -12,47 +12,30 @@ import QuestionDialog from "../components/QuestionDialog";
 import Button from "@mui/material/Button";
 import LoginDialog from "../components/LoginDialog";
 
-export default function Home(props) {
-    const { settings, questions: initQuestions } = props;
+export default function Home() {
     const [open, setOpen] = useState(false);
     const [logged, setLogged] = useState(false);
     const [token, setToken] = useState("");
     const [openLogin, setOpenLogin] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [questions, setQuestions] = useState(initQuestions);
 
     // fetcher("/api/list", { headers: { token } }).then((data) => setQuestions(data));
 
-    // const { data: questions } = useSWR(["/api/list", { headers: { token } }], fetcher);
+    const { data: questions } = useSWR(["/api/list", { headers: { token } }], fetcher);
+
+    const { data: settings } = useSWR("/api/settings", fetcher);
 
     useEffect(() => {
         if (localStorage.getItem("logged") === "true") {
             setLogged(true);
             setToken(localStorage.getItem("token"));
         }
-        setLoading(true);
-        fetcher(`/api/list?t=${Date.now()}`, { headers: { token: localStorage.getItem("token") } }).then((data) => {
-            setLoading(false);
-            setQuestions(data);
-        });
     }, [logged]);
-
-    // useEffect(() => {
-    //     setLoading(true);
-    //     fetcher(`/api/list?t=${Date.now()}`, { headers: { token } }).then((data) => {
-    //         setLoading(false);
-    //         setQuestions(data);
-    //     });
-    // }, [token]);
 
     const handleSubmitQuestion = async (content) => {
         await fetcher(`/api/question?content=${encodeURIComponent(content)}`);
         setSnackbarOpen(true);
-        setLoading(true);
-        const data = await fetcher(`/api/list?t=${Date.now()}`, { headers: { token } });
-        setQuestions(data);
-        setLoading(false);
     };
 
     const handleSubmitUserKey = async (content) => {
@@ -108,18 +91,18 @@ export default function Home(props) {
                 </div>
 
                 <div className={styles.grid}>
-                    {loading ? (
+                    {!questions ? (
                         <CircularProgress />
                     ) : (
                         questions.map((question, idx) => {
                             return (
-                                <a href={`/question/${question.objectId}`} key={`question_${idx}`} className={styles.card}>
+                                <a href={`/question/${question.objectId}`} key={`question_${question.objectId}`} className={styles.card}>
                                     <h2>
                                         {question.content.split("\n").map((item, index, arr) => (
-                                            <>
-                                                <span key={`content_${idx}_${index}`}>{item}</span>
-                                                {(index !== arr.length - 1 || index > 0) && <br key={`content_br_${idx}_${index}`} />}
-                                            </>
+                                            <div key={`content_${idx}_${index}`}>
+                                                <span>{item}</span>
+                                                {(index !== arr.length - 1 || index > 0) && <br />}
+                                            </div>
                                         ))}
                                         &rarr;
                                     </h2>

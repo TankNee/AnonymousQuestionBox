@@ -35,15 +35,16 @@ const ExpandMore = styled((props) => {
 }));
 
 export default function QuestionCard(props) {
-    const { question } = props;
     const router = useRouter();
-    const { id } = router.query;
+    const { id } = props;
     const [expanded, setExpanded] = useState(true);
     const [logged, setLogged] = useState(false);
     const [answer, setAnswer] = useState("");
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarHint, setSnackbarHint] = useState("");
     const [token, setToken] = useState("");
+
+    const { data: question } = useSWR(`/api/question/${id}`, fetcher);
 
     const { data: originalAnswer } = useSWR(`/api/answer/${id}`, fetcher);
 
@@ -82,8 +83,6 @@ export default function QuestionCard(props) {
         router.back();
     };
 
-    const handleHideQuestion = async () => {};
-
     const handleSnackbarClose = () => {
         setSnackbarOpen(false);
     };
@@ -96,70 +95,74 @@ export default function QuestionCard(props) {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className={styles.main}>
-                <Card sx={{ maxWidth: 400, width: "100%" }}>
-                    <CardHeader subheader={new Date(question?.createdAt).toLocaleString()} />
-                    <CardContent>
-                        <Typography variant="h6" color="text.secondary">
-                            {question.content.split("\n").map((item, index) => (
+                {!question ? (
+                    <CircularProgress />
+                ) : (
+                    <Card sx={{ maxWidth: 400, width: "100%" }}>
+                        <CardHeader subheader={new Date(question?.createdAt).toLocaleString()} />
+                        <CardContent>
+                            <Typography variant="h6" color="text.secondary">
+                                {question?.content?.split("\n").map((item, index) => (
+                                    <div key={`content_${index}`}>
+                                        <span>{item}</span>
+                                        <br />
+                                    </div>
+                                ))}
+                            </Typography>
+                        </CardContent>
+                        <CardActions disableSpacing>
+                            <IconButton aria-label="back-to-list" onClick={() => router.back()}>
+                                <ArrowBackIcon />
+                            </IconButton>
+                            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="comment">
+                                {expanded ? <ExpandLessOutlinedIcon /> : <AddCommentOutlinedIcon />}
+                            </ExpandMore>
+                        </CardActions>
+                        <Collapse in={expanded} timeout="auto" unmountOnExit>
+                            {logged ? (
                                 <>
-                                    <span key={`content_${index}`}>{item}</span>
-                                    <br key={`content_br_${index}`} />
-                                </>
-                            ))}
-                        </Typography>
-                    </CardContent>
-                    <CardActions disableSpacing>
-                        <IconButton aria-label="back-to-list" onClick={() => router.back()}>
-                            <ArrowBackIcon />
-                        </IconButton>
-                        <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="comment">
-                            {expanded ? <ExpandLessOutlinedIcon /> : <AddCommentOutlinedIcon />}
-                        </ExpandMore>
-                    </CardActions>
-                    <Collapse in={expanded} timeout="auto" unmountOnExit>
-                        {logged ? (
-                            <>
-                                <CardContent>
-                                    <TextField
-                                        fullWidth
-                                        onInput={(e) => {
-                                            setAnswer(e.target.value);
-                                        }}
-                                        rows={4}
-                                        multiline
-                                        autoFocus
-                                        margin="dense"
-                                        id="answer"
-                                        label="回答"
-                                        variant="outlined"
-                                        defaultValue={originalAnswer?.content}
-                                    />
-                                </CardContent>
-                                <CardActions disableSpacing>
-                                    {logged && (
-                                        <>
-                                            <Button size="small" onClick={handleDeleteQuestion}>
-                                                删除问题
-                                            </Button>
-                                            {/* <Button size="small" onClick={handleSaveAnswer}>
+                                    <CardContent>
+                                        <TextField
+                                            fullWidth
+                                            onInput={(e) => {
+                                                setAnswer(e.target.value);
+                                            }}
+                                            rows={4}
+                                            multiline
+                                            autoFocus
+                                            margin="dense"
+                                            id="answer"
+                                            label="回答"
+                                            variant="outlined"
+                                            defaultValue={originalAnswer?.content}
+                                        />
+                                    </CardContent>
+                                    <CardActions disableSpacing>
+                                        {logged && (
+                                            <>
+                                                <Button size="small" onClick={handleDeleteQuestion}>
+                                                    删除问题
+                                                </Button>
+                                                {/* <Button size="small" onClick={handleSaveAnswer}>
                                                 隐藏问题
                                             </Button> */}
-                                        </>
-                                    )}
-                                    <Button style={{ marginLeft: "auto" }} size="small" onClick={handleSaveAnswer}>
-                                        回答
-                                    </Button>
-                                </CardActions>
-                            </>
-                        ) : (
-                            <CardContent>
-                                <Typography variant="body1" color="text.secondary">
-                                    {originalAnswer?.content}
-                                </Typography>
-                            </CardContent>
-                        )}
-                    </Collapse>
-                </Card>
+                                            </>
+                                        )}
+                                        <Button style={{ marginLeft: "auto" }} size="small" onClick={handleSaveAnswer}>
+                                            回答
+                                        </Button>
+                                    </CardActions>
+                                </>
+                            ) : (
+                                <CardContent>
+                                    <Typography variant="body1" color="text.secondary">
+                                        {originalAnswer?.content}
+                                    </Typography>
+                                </CardContent>
+                            )}
+                        </Collapse>
+                    </Card>
+                )}
 
                 <Snackbar onClose={handleSnackbarClose} autoHideDuration={2000} anchorOrigin={{ vertical: "top", horizontal: "center" }} open={snackbarOpen}>
                     <Alert sx={{ width: "100%" }} severity="success">
@@ -178,13 +181,11 @@ export default function QuestionCard(props) {
         </div>
     );
 }
-export async function getServerSideProps(context) {
-    const basePath = process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : `http://localhost:${process.env.PORT}`;
-    const { id } = context.query;
-    const question = await fetcher(`${basePath}/api/question/${id}`);
+
+export async function getServerSideProps({ params }) {
     return {
         props: {
-            question,
+            id: params.id,
         },
     };
 }
