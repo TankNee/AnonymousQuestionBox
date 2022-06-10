@@ -7,32 +7,19 @@ export default async function handler(req, res) {
     query.descending("createdAt");
 
     const questions = await query.find();
-    const results = await Promise.all(
-        questions.map((question) => {
-            return new Promise((resolve, reject) => {
-                const answerQuery = new DBQuery(Answer);
-                answerQuery.equalTo("questionId", question.get("objectId"));
-                answerQuery
-                    .first()
-                    .then((answer) => {
-                        if (!answer) {
-                            resolve({
-                                ...question.toJSON(),
-                                answer: null,
-                            });
-                        } else {
-                            resolve({
-                                ...question.toJSON(),
-                                answer: answer.toJSON(),
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            });
-        })
-    );
+    const answerQuery = new DBQuery(Answer);
+    const questionIds = questions.map((q) => q.id);
+    answerQuery.containedIn("questionId", questionIds);
+    answerQuery.descending("createdAt");
+    const answers = await answerQuery.find();
+
+    const results = questions.map((q) => {
+        const answer = answers.find((a) => a.get("questionId") === q.id);
+        return {
+            ...q.toJSON(),
+            answer: answer ? answer : null,
+        };
+    });
 
     const filteredResults = results.filter((result) => result.answer);
     if (!token || !checkToken(token)) {
