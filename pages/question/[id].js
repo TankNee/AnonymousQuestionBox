@@ -93,6 +93,7 @@ export default function QuestionCard(props) {
                 <meta name="description" content="Self-hosted anonymous inbox" />
                 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
                 <link rel="icon" href="/favicon.ico" />
+                <script async defer data-website-id="ccaee418-93c4-44fb-90b6-f5c18bc0e3b7" src="https://dashboard.tanknee.cn/umami.js"></script>
             </Head>
             <main className={styles.main}>
                 {!question ? (
