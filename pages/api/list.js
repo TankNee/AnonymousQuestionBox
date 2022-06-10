@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         const answer = answers.find((a) => a.get("questionId") === q.id);
         return {
             ...q.toJSON(),
-            answer: answer ? answer : null,
+            answer: answer ? answer.toJSON() : null,
         };
     });
 
