@@ -18,7 +18,7 @@ export default function Home() {
     const [token, setToken] = useState("");
     const [openLogin, setOpenLogin] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
 
     // fetcher("/api/list", { headers: { token } }).then((data) => setQuestions(data));
 
@@ -34,8 +34,11 @@ export default function Home() {
     }, [logged]);
 
     const handleSubmitQuestion = async (content) => {
-        await fetcher(`/api/question?content=${encodeURIComponent(content)}`);
-        setSnackbarOpen(true);
+        const res = await fetcher(`/api/question?content=${encodeURIComponent(content)}`);
+        if (res.code === 0) {
+            setSnackbarMessage(res.msg);
+            setSnackbarOpen(true);
+        }
     };
 
     const handleSubmitUserKey = async (content) => {
@@ -116,8 +119,8 @@ export default function Home() {
                 <QuestionDialog onSubmit={handleSubmitQuestion} open={open} onClose={() => setOpen(false)} />
                 <LoginDialog onSubmit={handleSubmitUserKey} open={openLogin} onClose={() => setOpenLogin(false)} />
                 <Snackbar onClose={handleSnackbarClose} autoHideDuration={3000} anchorOrigin={{ vertical: "top", horizontal: "center" }} open={snackbarOpen}>
-                    <Alert sx={{ width: "100%" }} severity="success">
-                        提交成功!
+                    <Alert sx={{ width: "100%" }} severity="info">
+                        {snackbarMessage}
                     </Alert>
                 </Snackbar>
             </main>

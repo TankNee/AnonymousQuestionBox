@@ -12,3 +12,9 @@ export const checkToken = (token) => {
     }
     return true;
 };
+
+// 根据ip查询地址
+export const getAddressByIp = async (ip) => {
+    const res = await fetcher(`http://whois.pconline.com.cn/ipJson.jsp?ip=${ip}&json=true`);
+    return res.addr;
+};
