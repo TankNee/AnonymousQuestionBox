@@ -15,6 +15,6 @@ export const checkToken = (token) => {
 
 // 根据ip查询地址
 export const getAddressByIp = async (ip) => {
-    const res = await fetcher(`http://whois.pconline.com.cn/ipJson.jsp?ip=${ip}&json=true`);
-    return res.addr;
+    const res = await fetcher(`http://ip-api.com/json/${ip}?lang=zh-CN`);
+    return res.country + " " + res.regionName + " " + res.city;
 };
