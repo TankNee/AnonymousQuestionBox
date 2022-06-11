@@ -1,3 +1,4 @@
+import { getAddressByIp } from "../../../utils";
 import { DBQuery, Question, Settings } from "../../../utils/db";
 import { sendMail } from "../../../utils/mailer";
 
@@ -10,23 +11,36 @@ export default async function handler(req, res) {
     // 记录请求者的 referer
     const referer = req.headers["referer"];
 
+    const questionQuery = new DBQuery(Question);
+    // 一个ip一个小时内最多发三条
+    questionQuery.equalTo("ip", ip);
+    questionQuery.greaterThan("createdAt", new Date(Date.now() - 3600000));
+    const questionCount = await questionQuery.count();
+
+    if (questionCount >= 3) {
+        res.status(403).json({
+            code: 1,
+            msg: "提问已达上限",
+        });
+        return;
+    }
+    const addr = await getAddressByIp(ip);
+
     const question = new Question();
     question.set("content", content);
     question.set("ip", ip);
+    question.set("address", addr);
     question.set("userAgent", userAgent);
     question.set("referer", referer);
-    
+
     const query = new DBQuery(Settings);
     const settings = await query.first();
-    question
-        .save()
-        .then((question) => {
-            if (settings) {
-                sendMail(content.replace(/\n/g, "<br>"), settings.get("infoEmail"));
-            }
-            res.status(200).json(question.toJSON());
-        })
-        .catch((error) => {
-            res.status(500).json(error);
-        });
+    await question.save();
+    if (settings.get("email")) {
+        sendMail(content.replace(/\n/g, "<br>"), settings.get("infoEmail"));
+    }
+    res.status(200).json({
+        code: 0,
+        msg: "提问成功",
+    });
 }

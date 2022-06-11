@@ -10,8 +10,17 @@ import Alert from "@mui/material/Alert";
 export default function QuestionDialog(props) {
     const { open, onClose, onSubmit } = props;
     const [content, setContent] = useState("");
+    const [error, setError] = useState(false);
 
     const handleSubmit = (...args) => {
+        if (content.replace(/\s/g, "") === "") {
+            setError(true);
+            return;
+        }
+        if (content.toLowerCase().includes("test") || content.includes("测试")) {
+            setError(true);
+            return;
+        }
         onSubmit(content);
         setContent("");
         onClose(...args);
@@ -37,6 +46,7 @@ export default function QuestionDialog(props) {
                     </Alert>
                     <TextField
                         fullWidth
+                        error={error}
                         value={content}
                         onInput={(e) => {
                             setContent(e.target.value);
