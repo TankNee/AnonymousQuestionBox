@@ -6,7 +6,7 @@ import styles from "../styles/Home.module.css";
 export default function Container(props) {
     const { children, title } = props;
     return (
-        <div className="container">
+        <div className={styles.container}>
             <Head>
                 <title>{title}</title>
                 <meta name="description" content="Self-hosted anonymous inbox" />
