@@ -22,6 +22,8 @@ import Image from "next/image";
 import useSWR from "swr";
 import Head from "next/head";
 import { fetcher } from "../../utils";
+import Script from "next/script";
+import Container from "../../components/Container";
 
 const ExpandMore = styled((props) => {
     const { expand, ...other } = props;
@@ -88,98 +90,84 @@ export default function QuestionCard(props) {
     };
 
     return (
-        <div className={styles.container}>
-            <Head>
-                <meta name="description" content="Self-hosted anonymous inbox" />
-                <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-                <link rel="icon" href="/favicon.ico" />
-                <script async defer data-website-id="ccaee418-93c4-44fb-90b6-f5c18bc0e3b7" src="https://dashboard.tanknee.cn/umami.js"></script>
-            </Head>
-            <main className={styles.main}>
-                {!question ? (
-                    <CircularProgress />
-                ) : (
-                    <Card sx={{ maxWidth: 400, width: "100%" }}>
-                        <CardHeader subheader={new Date(question?.createdAt).toLocaleString()} />
-                        <CardContent>
-                            <Typography variant="h6" color="text.secondary">
-                                {question?.content?.split("\n").map((item, index) => (
-                                    <div key={`content_${index}`}>
-                                        <span>{item}</span>
-                                        <br />
-                                    </div>
-                                ))}
-                            </Typography>
-                        </CardContent>
-                        <CardActions disableSpacing>
-                            <IconButton aria-label="back-to-list" onClick={() => router.back()}>
-                                <ArrowBackIcon />
-                            </IconButton>
-                            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="comment">
-                                {expanded ? <ExpandLessOutlinedIcon /> : <AddCommentOutlinedIcon />}
-                            </ExpandMore>
-                        </CardActions>
-                        <Collapse in={expanded} timeout="auto" unmountOnExit>
-                            {logged ? (
-                                <>
-                                    <CardContent>
-                                        <TextField
-                                            fullWidth
-                                            onInput={(e) => {
-                                                setAnswer(e.target.value);
-                                            }}
-                                            rows={4}
-                                            multiline
-                                            autoFocus
-                                            margin="dense"
-                                            id="answer"
-                                            label="回答"
-                                            variant="outlined"
-                                            defaultValue={originalAnswer?.content}
-                                        />
-                                    </CardContent>
-                                    <CardActions disableSpacing>
-                                        {logged && (
-                                            <>
-                                                <Button size="small" onClick={handleDeleteQuestion}>
-                                                    删除问题
-                                                </Button>
-                                                {/* <Button size="small" onClick={handleSaveAnswer}>
-                                                隐藏问题
-                                            </Button> */}
-                                            </>
-                                        )}
-                                        <Button style={{ marginLeft: "auto" }} size="small" onClick={handleSaveAnswer}>
-                                            回答
-                                        </Button>
-                                    </CardActions>
-                                </>
-                            ) : (
+        <Container title="问题详情">
+            {!question ? (
+                <CircularProgress />
+            ) : (
+                <Card sx={{ maxWidth: 400, width: "100%" }}>
+                    <CardHeader subheader={new Date(question?.createdAt).toLocaleString()} />
+                    <CardContent>
+                        <Typography variant="h5" color="text.header">
+                            {question?.content?.split("\n").map((item, index) => (
+                                <div key={`question_content_${index}`}>
+                                    <span>{item}</span>
+                                    <br />
+                                </div>
+                            ))}
+                        </Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                        <IconButton aria-label="back-to-list" onClick={() => router.back()}>
+                            <ArrowBackIcon />
+                        </IconButton>
+                        <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="comment">
+                            {expanded ? <ExpandLessOutlinedIcon /> : <AddCommentOutlinedIcon />}
+                        </ExpandMore>
+                    </CardActions>
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                        {logged ? (
+                            <>
                                 <CardContent>
-                                    <Typography variant="body1" color="text.secondary">
-                                        {originalAnswer?.content}
-                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        onInput={(e) => {
+                                            setAnswer(e.target.value);
+                                        }}
+                                        rows={4}
+                                        multiline
+                                        autoFocus
+                                        margin="dense"
+                                        id="answer"
+                                        label="回答"
+                                        variant="outlined"
+                                        defaultValue={originalAnswer?.content}
+                                    />
                                 </CardContent>
-                            )}
-                        </Collapse>
-                    </Card>
-                )}
+                                <CardActions disableSpacing>
+                                    {logged && (
+                                        <>
+                                            <Button size="small" onClick={handleDeleteQuestion}>
+                                                删除问题
+                                            </Button>
+                                        </>
+                                    )}
+                                    <Button style={{ marginLeft: "auto" }} size="small" onClick={handleSaveAnswer}>
+                                        回答
+                                    </Button>
+                                </CardActions>
+                            </>
+                        ) : (
+                            <CardContent>
+                                <Typography variant="body1" color="text.secondary">
+                                    {originalAnswer?.content?.split("\n").map((item, index) => (
+                                        <div key={`answer_content_${index}`}>
+                                            <span>{item}</span>
+                                            <br />
+                                        </div>
+                                    ))}
+                                </Typography>
+                            </CardContent>
+                        )}
+                    </Collapse>
+                </Card>
+            )}
 
-                <Snackbar onClose={handleSnackbarClose} autoHideDuration={2000} anchorOrigin={{ vertical: "top", horizontal: "center" }} open={snackbarOpen}>
-                    <Alert sx={{ width: "100%" }} severity="success">
-                        {snackbarHint}
-                    </Alert>
-                </Snackbar>
-            </main>
-            <footer className={styles.footer}>
-                <a href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app" target="_blank" rel="noopener noreferrer">
-                    Powered by {"TankNee"}
-                    <span className={styles.logo}>
-                        <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-                    </span>
-                </a>
-            </footer>
-        </div>
+            <Snackbar onClose={handleSnackbarClose} autoHideDuration={2000} anchorOrigin={{ vertical: "top", horizontal: "center" }} open={snackbarOpen}>
+                <Alert sx={{ width: "100%" }} severity="success">
+                    {snackbarHint}
+                </Alert>
+            </Snackbar>
+        </Container>
     );
 }
 

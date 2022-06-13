@@ -124,6 +124,15 @@
     width: 100%;
 }
 
+.settingsForm {
+    display: flex;
+    flex-direction: column;
+}
+
+.settingsForm div {
+    margin: 0.5rem 0;
+}
+
 @media (max-width: 460px) {
     .grid {
         width: 100%;

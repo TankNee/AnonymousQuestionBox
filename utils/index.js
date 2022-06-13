@@ -18,3 +18,6 @@ export const getAddressByIp = async (ip) => {
     const res = await fetcher(`http://ip-api.com/json/${ip}?lang=zh-CN`);
     return res.country + " " + res.regionName + " " + res.city;
 };
+export const BASE_REQUEST_PATH = process.env.NEXT_PUBLIC_VERCEL_URL
+  ? process.env.NEXT_PUBLIC_VERCEL_URL.startsWith("http") ? process.env.NEXT_PUBLIC_VERCEL_URL : `http://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+  : `http://localhost:${process.env.PORT}`;
