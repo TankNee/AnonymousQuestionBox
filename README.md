@@ -30,6 +30,8 @@
 
 首先打开 [LeanCloud](https://www.leancloud.cn/) 平台，创建一个新应用：
 
+>   LeanCloud 国际版已经通过测试，国际版不需要国内域名，可以直接使用 LeanCloud 提供的服务域名！
+
 ![image.png](assets/image-20220613202646-ztybp4s.png)
 
 选择免费版即可，完全足够。
