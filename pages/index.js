@@ -99,6 +99,7 @@ export default function Home(props) {
                                     ))}
                                     &rarr;
                                 </h2>
+                                <h4>{new Date(question.createdAt).toLocaleDateString()}</h4>
                                 <p>{question.answer?.content}</p>
                             </a>
                         );

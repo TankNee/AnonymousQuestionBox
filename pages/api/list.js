@@ -22,9 +22,18 @@ export default async function handler(req, res) {
     });
 
     const filteredResults = results.filter((result) => result.answer);
+    let ret;
     if (!token || !checkToken(token)) {
-        res.status(200).json(filteredResults);
+        ret = filteredResults;
     } else {
-        res.status(200).json(results);
+        ret = results;
     }
+    ret = ret.map((q) => {
+        delete q.ip;
+        delete q.address;
+        delete q.userAgent;
+        delete q.referer;
+        return q;
+    });
+    res.status(200).json(ret);
 }

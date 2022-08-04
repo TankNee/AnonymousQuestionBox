@@ -91,6 +91,13 @@
     font-size: 1.5rem;
 }
 
+.card h4 {
+    margin: 0 0 1rem 0;
+    font-size: 0.75rem;
+    color: rgb(93, 89, 89);
+    font-weight: 500;
+}
+
 .card p {
     margin: 0;
     font-size: 1.2rem;

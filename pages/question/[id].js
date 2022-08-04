@@ -107,7 +107,7 @@ export default function QuestionCard(props) {
                         </Typography>
                     </CardContent>
                     <CardActions disableSpacing>
-                        <IconButton aria-label="back-to-list" onClick={() => router.back()}>
+                        <IconButton aria-label="back-to-list" onClick={() => router.push("/")}>
                             <ArrowBackIcon />
                         </IconButton>
                         <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="comment">
